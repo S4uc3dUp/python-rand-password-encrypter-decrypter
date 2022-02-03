@@ -1,0 +1,112 @@
+import string
+import random
+import os
+from cryptography.fernet import Fernet
+
+alphabets = list(string.ascii_letters)
+digits = list(string.digits)
+special_characters = list("!@#$%^&*()")
+characters = list(string.ascii_letters + string.digits + "!@#$%^&*()")
+
+"""
+This will create a encrypted key that saves to a file? 
+Not sure if i intended it to work like this. Trying to encrypt users password 
+"""
+
+
+def generate_key():
+    secret = 'C:/Test/'
+    if not os.path.isdir(secret):
+        os.mkdir(secret)
+    with open(os.path.join('C:/Test', 'secret.key'), 'wb') as key_file:
+        key_file.write(CryptKey.key)
+        return
+
+
+class CryptKey:
+    password = []
+    key = Fernet.generate_key()
+    fernet = Fernet(key)
+
+    """
+    Loads previously generated key
+    """
+    def load_key(self):
+        with open('C:/Test/secret.key', 'rb') as file:
+            self.key = file.read()
+            encrypted_pwd = CryptKey.fernet.encrypt(CryptKey.key)
+            with open('C:/Test/secret.key', 'wb') as encrypted_file:
+                encrypted_file.write(encrypted_pwd)
+                return
+    """
+    Encrypts Message and then decrypts it with output to screen
+    """
+    def encrypt_password(self):
+        self.load_key()
+        encrypted_pwd = CryptKey.fernet.encrypt(CryptKey.key)
+
+        print("\nencrypted string: ", encrypted_pwd)
+        decrypted_pwd = CryptKey.fernet.decrypt(encrypted_pwd)
+        print("\ndecrypted string: ", decrypted_pwd)
+
+    """
+    Create a random password and save to a created dir
+    """
+    def generate_random_password(self):
+        length = int(input("Enter password length: "))
+        """
+        Allows user to select length, letter, digits, and special characters
+        """
+        alphabets_count = int(input("Enter alphabets count in password: "))
+        digits_count = int(input("Enter digits count in password: "))
+        special_characters_count = int(input("Enter special characters count in password: "))
+
+        characters_count = alphabets_count + digits_count + special_characters_count
+
+        """
+        Wont let the user selects more then the length they chooses
+        """
+        if characters_count > length:
+            print("Characters total count is greater than the password length")
+            return
+
+        for i in range(alphabets_count):
+            self.password.append(random.choice(alphabets))
+
+        for i in range(digits_count):
+            self.password.append(random.choice(digits))
+
+        for i in range(special_characters_count):
+            self.password.append(random.choice(special_characters))
+
+        if characters_count < length:
+            random.shuffle(characters)
+            for i in range(length - characters_count):
+                self.password.append(random.choice(characters))
+
+        """
+        Random shuffle users input then prints to output
+        """
+        random.shuffle(CryptKey.password)
+
+        print("".join(CryptKey.password))
+
+        """
+        Create dir if its not there
+        """
+        directory = 'C:/Test/'
+        if not os.path.isdir(directory):
+            os.mkdir(directory)
+
+        with open(os.path.join('C:/Test', "pwdgen.txt"), 'a') as f:
+            f.writelines(CryptKey.password)
+            f.write('\n')
+            f.close()
+
+"""
+Runs code? Think this is in the right spot
+"""
+obj = CryptKey()
+generate_key()
+obj.generate_random_password()
+obj.encrypt_password()
